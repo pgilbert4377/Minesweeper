@@ -291,11 +291,35 @@ public class Minesweeper
             }
         }
 
-        System.out.println("Welcome");
+        System.out.println("Welcome to my version of Minesweeper!\nTo play the game, you must enter the coordinates of the box you'd like to search, leave the flagged boxes alone.\nWhen the only boxes left are the mines, you have won the game!");
 
+        int row = 0;
+        
         while(!gameFinished)
         {
-            
+            printBoard(master);
+            gameFinished = true;
+        }
+    }
+    
+    public void printBoard(String[][] b)
+    {
+        String[] letters = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
+        String colhead = "";
+        for(int i = 0; i < width; i++)
+        {
+            colhead = colhead + "\t|\t" + letters[i];
+        }
+        System.out.println(colhead);
+
+        for(int i = 0; i < height; i++)
+        {
+            System.out.println(i);
+            for(int j = 0; j < width; j++)
+            {
+                System.out.print("\t|\t" + b[i][j]);
+            }
+            System.out.println();
         }
     }
 
