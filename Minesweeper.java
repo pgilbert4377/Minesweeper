@@ -6,6 +6,8 @@ public class Minesweeper
     int width = 0;
     String validation = "";
     boolean isValid = false;
+    String[] letters = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
+    int mines;
     
 
     public Minesweeper()
@@ -55,7 +57,7 @@ public class Minesweeper
         }
         int x;
         int y;
-        int mines = (int)(Math.sqrt(height*width));
+        mines = (int)(Math.sqrt(height*width));
 
         while(mines != 0)
         {
@@ -92,7 +94,7 @@ public class Minesweeper
                     }
                     else if(i == 0 && j == width - 1)
                     {
-                        if(b[0][j-1].equals("(BOOM!"))
+                        if(b[0][j-1].equals("BOOM!"))
                         {
                             number++;
                         }
@@ -257,7 +259,7 @@ public class Minesweeper
                         {
                             number++;
                         }
-                        if(b[i+1][j+1].equals("BOOM!"))
+                        if(b[i+1][j-1].equals("BOOM!"))
                         {
                             number++;
                         }
@@ -267,15 +269,6 @@ public class Minesweeper
             }
         }
 
-        for(int i = 0; i < height; i++)
-        {
-            for(int j = 0; j < width; j++)
-            {
-                System.out.print(b[i][j] + " ");
-            }
-            System.out.println();
-        }
-
         return b;
     }
 
@@ -283,44 +276,193 @@ public class Minesweeper
     {
         boolean gameFinished = false;
         String[][] board = new String[height][width];
+        int row;
+        int col;
+
         for(int i = 0; i < height; i++)
         {
             for(int j = 0; j < width; j++)
             {
-                board[i][j] = "\t";
+                board[i][j] = " ";
             }
         }
 
         System.out.println("Welcome to my version of Minesweeper!\nTo play the game, you must enter the coordinates of the box you'd like to search, leave the flagged boxes alone.\nWhen the only boxes left are the mines, you have won the game!");
+        printBoard(board);
 
-        int row = 0;
-        
         while(!gameFinished)
         {
-            printBoard(master);
-            gameFinished = true;
+            try
+            {
+                System.out.print("Enter the coordinates of where you'd like to dig (ex. A1): ");
+                validation = kb.nextLine();
+                col = (int)(validation.charAt(0) - 65);
+                row = Integer.parseInt(validation.substring(1)) - 1;
+                if(row > height || col > width)
+                {
+                    throw new Exception();
+                }
+                dig(board, master, row, col);
+                if(board[row][col].equals("BOOM!"))
+                {
+                    gameFinished = true;
+                    System.out.println("You hit a bomb, better luck next time!");
+                }
+                else if(checkBoard(board) == mines)
+                {
+                    gameFinished = true;
+                    System.out.println("Congrats, you've completed the game successfully!");
+                }
+                else
+                {
+                    printBoard(board);
+                }
+            }
+            catch(Exception e)
+            {
+                System.out.println("That is not a valid coordinate for this board, try again");
+            }
         }
+        printBoard(master);
     }
     
     public void printBoard(String[][] b)
     {
-        String[] letters = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
         String colhead = "";
         for(int i = 0; i < width; i++)
         {
             colhead = colhead + "\t|\t" + letters[i];
         }
-        System.out.println(colhead);
+        System.out.print(colhead + "\n--------");
+        for(int j = 0; j < width; j++)
+        {
+            System.out.print("----------------");
+        }
+        System.out.println();
 
         for(int i = 0; i < height; i++)
         {
-            System.out.println(i);
+            System.out.print(i + 1);
             for(int j = 0; j < width; j++)
             {
                 System.out.print("\t|\t" + b[i][j]);
             }
             System.out.println();
+            System.out.print("--------");
+            for(int j = 0; j < width; j++)
+            {
+                System.out.print("----------------");
+            }
+            System.out.println();
         }
+    }
+
+    public void dig(String[][] b, String[][] m, int r, int c)
+    {
+        if(b[r][c].equals(" "))
+        {
+            if(!m[r][c].equals("0"))
+            {
+                b[r][c] = m[r][c];
+                return;
+            }
+            else if(m[r][c].equals("0") && r == 0 && c == 0)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r + 1, c);
+                dig(b, m, r + 1, c + 1);
+                dig(b, m, r, c + 1);
+            }
+            else if(m[r][c].equals("0") && r == 0 && c == width - 1)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r, c - 1);
+                dig(b, m, r + 1, c - 1);
+                dig(b, m, r + 1, c);
+            }
+            else if(m[r][c].equals("0") && r == height - 1 && c == 0)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r - 1, c);
+                dig(b, m, r - 1, c + 1);
+                dig(b, m, r, c + 1);
+            }
+            else if(m[r][c].equals("0") && r == height - 1 && c == width - 1)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r - 1, c);
+                dig(b, m, r - 1, c - 1);
+                dig(b, m, r, c - 1);
+            }
+            else if(m[r][c].equals("0") && r == 0)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r, c - 1);
+                dig(b, m, r + 1, c - 1);
+                dig(b, m, r + 1, c);
+                dig(b, m, r + 1, c + 1);
+                dig(b, m, r, c + 1);
+            }
+            else if(m[r][c].equals("0") && r == height - 1)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r, c - 1);
+                dig(b, m, r - 1, c - 1);
+                dig(b, m, r - 1, c);
+                dig(b, m, r - 1, c + 1);
+                dig(b, m, r, c + 1);
+            }
+            else if(m[r][c].equals("0") && c == 0)
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r - 1, c);
+                dig(b, m, r - 1, c + 1);
+                dig(b, m, r, c + 1);
+                dig(b, m, r + 1, c + 1);
+                dig(b, m, r + 1, c);
+            }
+            else if(m[r][c].equals("0") && c == width - 1)
+            {            
+                b[r][c] = m[r][c];
+                dig(b, m, r - 1, c);
+                dig(b, m, r - 1, c - 1);
+                dig(b, m, r, c - 1);
+                dig(b, m, r + 1, c - 1);
+                dig(b, m, r + 1, c);
+            }
+            else
+            {
+                b[r][c] = m[r][c];
+                dig(b, m, r - 1, c - 1);
+                dig(b, m, r - 1, c);
+                dig(b, m, r - 1, c + 1);
+                dig(b, m, r, c - 1);
+                dig(b, m, r, c + 1);
+                dig(b, m, r + 1, c - 1);
+                dig(b, m, r + 1, c);
+                dig(b, m, r + 1, c + 1);
+            }
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    public int checkBoard(String[][] b)
+    {
+        int blanks = 0;
+        for(int i = 0; i < height; i++)
+        {
+            for(int j = 0; j < width; j++)
+            {
+                if(b[i][j].equals(" "))
+                {
+                    blanks++;
+                }
+            }
+        }
+        return blanks;
     }
 
 }
