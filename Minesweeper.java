@@ -8,6 +8,7 @@ public class Minesweeper
     boolean isValid = false;
     String[] letters = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
     int mines;
+    int endNumber;
     
 
     public Minesweeper()
@@ -40,6 +41,7 @@ public class Minesweeper
         }
         board = createBoard();
         playGame(board);
+        printBoard(board);
     }
     
     public String[][] createBoard()
@@ -58,6 +60,7 @@ public class Minesweeper
         int x;
         int y;
         mines = (int)(Math.sqrt(height*width));
+        endNumber = mines;
 
         while(mines != 0)
         {
@@ -278,6 +281,7 @@ public class Minesweeper
         String[][] board = new String[height][width];
         int row;
         int col;
+        boolean flag = false;
 
         for(int i = 0; i < height; i++)
         {
@@ -294,28 +298,75 @@ public class Minesweeper
         {
             try
             {
-                System.out.print("Enter the coordinates of where you'd like to dig (ex. A1): ");
-                validation = kb.nextLine();
-                col = (int)(validation.charAt(0) - 65);
-                row = Integer.parseInt(validation.substring(1)) - 1;
-                if(row > height || col > width)
+                if(!flag)
                 {
-                    throw new Exception();
-                }
-                dig(board, master, row, col);
-                if(board[row][col].equals("BOOM!"))
-                {
-                    gameFinished = true;
-                    System.out.println("You hit a bomb, better luck next time!");
-                }
-                else if(checkBoard(board) == mines)
-                {
-                    gameFinished = true;
-                    System.out.println("Congrats, you've completed the game successfully!");
+                    while(!flag)
+                    {
+                        System.out.print("Enter the coordinates of where you'd like to dig (ex. A1) or hit ENTER to switch to planting: ");
+                        validation = kb.nextLine();
+                        if(validation.equals(""))
+                        {
+                            flag = true;
+                        }
+                        else
+                        {
+                            col = (int)(validation.charAt(0) - 65);
+                            row = Integer.parseInt(validation.substring(1)) - 1;
+                            if(row > height || col > width)
+                            {
+                                throw new Exception();
+                            }
+                            dig(board, master, row, col);
+                            if(board[row][col].equals("BOOM!"))
+                            {
+                                gameFinished = true;
+                                flag = !flag;
+                                System.out.println("You hit a bomb, better luck next time!");
+                            }
+                            else if(checkBoard(board) == endNumber)
+                            {
+                                gameFinished = true;
+                                System.out.println("Congrats, you've completed the game successfully!");
+                                return;
+                            }
+                            else
+                            {
+                                printBoard(board);
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    printBoard(board);
+                    while(flag)
+                    {
+                        System.out.print("Enter the coordinates of where you'd like to flag (ex. A1) or hit ENTER to switch to digging: ");
+                        validation = kb.nextLine();
+                        if(validation.equals(""))
+                        {
+                            flag = false;
+                        }
+                        else
+                        {
+                            col = (int)(validation.charAt(0) - 65);
+                            row = Integer.parseInt(validation.substring(1)) - 1;
+                            if(row > height || col > width)
+                            {
+                                throw new Exception();
+                            }
+                            plant(board, row, col);
+                            if(checkBoard(board) == endNumber)
+                            {
+                                gameFinished = true;
+                                System.out.println("Congrats, you've completed the game successfully!");
+                                return;
+                            }
+                            else
+                            {
+                                printBoard(board);
+                            }
+                        }
+                    }
                 }
             }
             catch(Exception e)
@@ -323,7 +374,6 @@ public class Minesweeper
                 System.out.println("That is not a valid coordinate for this board, try again");
             }
         }
-        printBoard(master);
     }
     
     public void printBoard(String[][] b)
@@ -449,6 +499,22 @@ public class Minesweeper
         }
     }
 
+    public void plant(String[][] b, int r, int c)
+    {
+        if(b[r][c].equals(" "))
+        {
+            b[r][c] = "|>";
+        }
+        else if(b[r][c].equals("|>"))
+        {
+            b[r][c] = " ";
+        }
+        else
+        {
+            System.out.println("That spot cannot be flagged");
+        }
+    }
+
     public int checkBoard(String[][] b)
     {
         int blanks = 0;
@@ -456,7 +522,7 @@ public class Minesweeper
         {
             for(int j = 0; j < width; j++)
             {
-                if(b[i][j].equals(" "))
+                if(b[i][j].equals(" ") || b[i][j].equals("|>"))
                 {
                     blanks++;
                 }
